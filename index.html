@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#F3F4F5">
 <link rel="manifest" href="manifest.json">
-<link rel="icon" href="icon-192.png">
+<link rel="icon" href="icon-v2-192.png">
 <title>Sumemo</title>
 <style>
 *{box-sizing:border-box}
@@ -54,6 +54,20 @@ video{width:100%;border-radius:18px;background:#000}
 .dark .card,.dark .row,.dark .small,.dark .chip,.dark input,.dark select,.dark .day{background:#161616;color:#F2EBDD;border-color:#4A4438}
 .dark .back{color:#E8DCC4}
 .dark .day.now{border-color:#E8DCC4}
+#spl{position:fixed;inset:0;z-index:99;background:var(--sb);overflow:hidden;transition:opacity .5s;--st:#fff;--sb:#DCE5E2;--ss:#4F6B66;--sa:#3E5753;--sx:#3E5753}
+#spl.dk{--st:#000;--sb:#1E2321;--ss:#E8DCC4;--sa:#B8AD98;--sx:#F2EBDD}
+#spl.out{opacity:0}
+#spl svg{width:100%;height:100%;overflow:visible;display:block}
+.s-sil{fill:var(--ss);transform-origin:270px 330px;animation:s-shrink 1.4s .4s cubic-bezier(.65,0,.35,1) both}
+@keyframes s-shrink{from{transform:scale(40);fill:var(--st)}to{transform:scale(1);fill:var(--ss)}}
+.s-arm{animation:s-arm 1.1s 2s cubic-bezier(.2,.7,.2,1) both,s-pat .9s 3.2s ease-in-out forwards}
+@keyframes s-arm{from{transform:translateX(-460px)}to{transform:translateX(0)}}
+@keyframes s-pat{0%,100%{transform:translate(0,0)}25%{transform:translate(3px,7px)}50%{transform:translate(0,0)}75%{transform:translate(3px,7px)}}
+.s-line{fill:none;stroke:var(--sa);stroke-width:30;stroke-linecap:round}
+.s-hand{fill:var(--sa)}
+.s-fing path{fill:none;stroke:var(--sa);stroke-width:12;stroke-linecap:round}
+.s-tx{fill:var(--sx);font-family:system-ui,-apple-system,Roboto,sans-serif;text-anchor:middle;opacity:0;animation:s-fade .7s 3.3s both}
+@keyframes s-fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
@@ -158,6 +172,12 @@ const TR={'Bonjour':['Buongiorno','Hello','Guten Tag'],'Que voulez-vous faire ?'
 const SQ={'Bonjour':'Përshëndetje','Que voulez-vous faire ?':'Çfarë dëshironi të bëni?','Ajouter':'Shto','Scanner une boîte':'Skano një kuti','Calendrier':'Kalendari','Prises et dates':'Marrjet dhe datat','Mes proches':'Të afërmit e mi','Ils m’aident':'Ata më ndihmojnë','Famille':'Familja','Coordonnées':'Kontaktet','Mes médicaments':'Ilaçet e mia','Ma pharmacie':'Farmacia ime','Appeler':'Telefono','Proche ou médecin':'I afërm ose mjek','Pilule':'Pilula','Paramètres':'Cilësimet','Langue, thème':'Gjuha, pamja','← Accueil':'← Kryefaqja','Ajouter un médicament':'Shto një ilaç','Photographier la boîte':'Fotografo kutinë','Photographier l’ordonnance':'Fotografo recetën','Nom':'Emri','Date de péremption':'Data e skadencës','Schéma de prise':'Skema e marrjes','+ Ajouter une phase':'+ Shto një fazë','Créer les rappels':'Krijo kujtesat','Aujourd’hui':'Sot','C’est l’heure de votre médicament':'Është koha për ilaçin tuaj','✓ J’ai pris':'✓ E mora','✗ Pas pris':'✗ Nuk e mora','✓ Pris':'✓ Marrë','À prendre':'Për t’u marrë','Aucun rappel. Ajoutez un médicament.':'Asnjë kujtesë. Shtoni një ilaç.','Péremptions':'Skadencat','À renouveler':'Për rinovim','Retirer':'Hiq','Mettre à jour le stock':'Përditëso stokun','Prévenir un proche ?':'Të njoftojmë një të afërm?','Non merci':'Jo, faleminderit','Pilule contraceptive':'Pilula kontraceptive','Heure de prise':'Ora e marrjes','Début de la plaquette':'Fillimi i paketës','Type de plaquette':'Lloji i paketës','Enregistrer':'Ruaj','J’ai pris ma pilule aujourd’hui':'E mora pilulën sot','✓ pris · ✗ oublié · — pause':'✓ marrë · ✗ harruar · — pauzë','Coordonnées patient':'Të dhënat e pacientit','Langue':'Gjuha','Apparence':'Pamja','Clair':'E çelët','Sombre':'E errët','Prénom et nom':'Emri dhe mbiemri','Date de naissance':'Data e lindjes','Téléphone':'Telefoni','Adresse':'Adresa','Médecin traitant':'Mjeku i familjes'};
 Object.keys(TR).forEach(k=>{TR[k][3]=SQ[k]});
 Object.assign(TR,{"Qui sommes-nous ?": ["Chi siamo?", "About us", "Über uns", "Kush jemi ne?"], "Je suis celui qui se souvient.": ["Sono colui che ricorda.", "I am the one who remembers.", "Ich bin derjenige, der sich erinnert.", "Unë jam ai që kujton."], "Sumemo vient du latin : sum, « je suis », et memor, « qui se souvient ».": ["Sumemo viene dal latino: sum, «io sono», e memor, «che ricorda».", "Sumemo comes from Latin: sum, “I am”, and memor, “who remembers”.", "Sumemo kommt aus dem Lateinischen: sum, „ich bin“, und memor, „der sich erinnert“.", "Sumemo vjen nga latinishtja: sum, «unë jam», dhe memor, «që kujton»."], "Pour vous et vos proches, Sumemo garde la mémoire des traitements, rappelle les prises et prévient quand il le faut.": ["Per voi e i vostri cari, Sumemo ricorda le terapie, ricorda le assunzioni e avvisa quando serve.", "For you and your loved ones, Sumemo keeps track of treatments, reminds you of doses and alerts when needed.", "Für Sie und Ihre Angehörigen merkt sich Sumemo die Behandlungen, erinnert an die Einnahmen und warnt, wenn nötig.", "Për ju dhe të afërmit tuaj, Sumemo mban mend trajtimet, kujton marrjet dhe njofton kur duhet."], "Sumemo n’est ni un dispositif médical ni un service d’urgence. Suivez toujours les indications de votre médecin ou pharmacien. En cas d’urgence : 144.": ["Sumemo non è un dispositivo medico né un servizio di emergenza. Seguite sempre le indicazioni del medico o del farmacista. In caso di emergenza: 144.", "Sumemo is neither a medical device nor an emergency service. Always follow your doctor’s or pharmacist’s advice. In an emergency: 144.", "Sumemo ist weder ein Medizinprodukt noch ein Notfalldienst. Befolgen Sie immer die Anweisungen Ihres Arztes oder Apothekers. Im Notfall: 144.", "Sumemo nuk është pajisje mjekësore dhe as shërbim urgjence. Ndiqni gjithmonë udhëzimet e mjekut ose farmacistit. Në rast urgjence: 144."], "© 2026 Sumemo. Tous droits réservés.": ["© 2026 Sumemo. Tutti i diritti riservati.", "© 2026 Sumemo. All rights reserved.", "© 2026 Sumemo. Alle Rechte vorbehalten.", "© 2026 Sumemo. Të gjitha të drejtat e rezervuara."]});
+function splash(){
+try{if(sessionStorage.getItem('spl')||(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches))return;sessionStorage.setItem('spl','1')}catch(e){}
+const i={it:0,en:1,de:2,sq:3}[S.set.lang],tg='Je suis celui qui se souvient.',line=i===undefined?tg:TR[tg][i];
+document.body.insertAdjacentHTML('beforeend','<div id="spl" class="'+(S.set.dark?'dk':'')+'" onclick="endSplash()" aria-hidden="true"><svg viewBox="0 0 390 600" preserveAspectRatio="xMidYMid meet"><g class="s-sil"><circle cx="270" cy="250" r="44"/><path d="M170 430C170 350 215 314 270 314C325 314 370 350 370 430Z"/></g><g class="s-arm"><path class="s-line" d="M-300 400C-100 400 50 380 186 350"/><ellipse class="s-hand" cx="204" cy="342" rx="24" ry="23"/><g class="s-fing"><path d="M214 326L246 329M217 339L252 344M214 352L248 360M207 363L234 376"/><path d="M196 322L214 308"/></g></g><text class="s-tx" x="195" y="535" font-size="42" font-weight="700">Sumemo</text><text class="s-tx" x="195" y="570" font-size="17" style="animation-delay:3.5s">'+esc(line)+'</text></svg></div>');
+setTimeout(endSplash,5000)}
+function endSplash(){const e=document.getElementById('spl');if(!e||e.classList.contains('out'))return;e.classList.add('out');setTimeout(()=>e.remove(),600)}
 function tr(){const i={it:0,en:1,de:2,sq:3}[S.set.lang];if(i===undefined)return;const w=document.createTreeWalker($('#app'),NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const t=n.nodeValue.trim();if(TR[t])n.nodeValue=n.nodeValue.replace(t,TR[t][i])}}
 const phRow=p=>`<div class="card ph"><label>Pendant (jours)<input class="d" type="number" min="1" value="${p.days}"></label><label>Tous les (jours)<input class="e" type="number" min="1" value="${p.every}"></label><label>Heures (ex. 08:00, 20:00)<input class="t" value="${p.times.join(', ')}"></label><label>Comprimés par prise<input class="q" type="number" min="0.5" step="0.5" value="${p.qty}"></label><button class="small" onclick="this.parentNode.remove()">Retirer la phase</button></div>`;
 const setPhases=a=>{$('#ph').innerHTML=a.map(phRow).join('')};
@@ -199,6 +219,7 @@ S.meds.forEach(m=>{if(!m.phases){m.phases=[{days:3650,every:1,qty:1,times:m.slot
 S.set=S.set||{lang:'fr',dark:false};S.patient=S.patient||{};
 save();
 render();
+splash();
 </script>
 </body>
 </html>
