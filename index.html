@@ -3,35 +3,36 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#F6F3EC">
+<meta name="theme-color" content="#E4E8EA">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <title>Mes médicaments</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#F6F3EC;color:#1F2A2E;font-family:system-ui,-apple-system,Roboto,sans-serif;font-size:20px}
+body{margin:0;background:#E4E8EA;color:#1F2A2E;font-family:system-ui,-apple-system,Roboto,sans-serif;font-size:20px}
 button,input,a{font:inherit}
 .scr{min-height:100dvh;padding:max(28px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
 h1{margin:0;font-size:32px;line-height:1.1}
 .sub{color:#4A575B}
 .grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:14px;min-height:620px}
-.tile{border:2px solid #CFC8B8;border-radius:22px;background:#fff;color:#1F2A2E;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;text-align:left;font-size:24px;font-weight:700}
-.tile small{display:block;font-weight:400;font-size:16px;color:#4A575B}
-.tile.p{background:#17506B;border-color:#17506B;color:#fff}
+.tile{border:2px solid #5E6B2F;border-radius:22px;background:#5E6B2F;color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;text-align:left;font-size:24px;font-weight:700}
+.tile small{display:block;font-weight:400;font-size:16px;color:#EEF1E0}
+.tile.p{background:#4A5522;border-color:#4A5522;color:#fff}
+.tile svg{stroke:#fff}
 .tile.p small{color:#fff}
-.card{background:#fff;border:2px solid #CFC8B8;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
-.big{display:block;text-align:center;text-decoration:none;border:0;border-radius:22px;background:#17506B;color:#fff;font-size:26px;font-weight:700;padding:22px}
+.card{background:#fff;border:2px solid #BFC5AE;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.big{display:block;text-align:center;text-decoration:none;border:0;border-radius:22px;background:#5E6B2F;color:#fff;font-size:26px;font-weight:700;padding:22px}
 .go{background:#14573A}
 .no{background:#B42318}
-.back{align-self:flex-start;border:0;background:none;color:#17506B;font-size:20px;font-weight:700;padding:8px 0}
-.small{border:2px solid #CFC8B8;background:#fff;border-radius:14px;padding:10px 16px;font-size:18px;align-self:flex-start}
+.back{align-self:flex-start;border:0;background:none;color:#5E6B2F;font-size:20px;font-weight:700;padding:8px 0}
+.small{border:2px solid #BFC5AE;background:#fff;border-radius:14px;padding:10px 16px;font-size:18px;align-self:flex-start}
 label{display:flex;flex-direction:column;gap:6px;font-weight:700}
-input,select{border:2px solid #CFC8B8;border-radius:16px;padding:14px;font-size:22px;background:#fff;width:100%}
+input,select{border:2px solid #BFC5AE;border-radius:16px;padding:14px;font-size:22px;background:#fff;width:100%}
 .chips{display:flex;gap:10px}
-.chip{flex:1;border:2px solid #CFC8B8;border-radius:18px;background:#fff;padding:18px 4px;font-size:22px;font-weight:700}
-.chip.on{background:#17506B;border-color:#17506B;color:#fff}
+.chip{flex:1;border:2px solid #BFC5AE;border-radius:18px;background:#fff;padding:18px 4px;font-size:22px;font-weight:700}
+.chip.on{background:#5E6B2F;border-color:#5E6B2F;color:#fff}
 .chip.on::before{content:'✓ '}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:2px solid #CFC8B8;border-radius:20px;background:#fff;color:#1F2A2E;padding:16px;font-size:20px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:2px solid #BFC5AE;border-radius:20px;background:#fff;color:#1F2A2E;padding:16px;font-size:20px}
 .st{font-weight:700;text-align:right}
 .st.pris{color:#14573A}
 .st.pas{color:#B42318}
@@ -41,8 +42,8 @@ video{width:100%;border-radius:18px;background:#000}
 .flex1 .big{flex:1;display:flex;align-items:center;justify-content:center}
 .chips{flex-wrap:wrap}.chip{flex:1 1 40%}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
-.day{border:2px solid #CFC8B8;border-radius:12px;background:#fff;color:inherit;padding:6px 0;font-size:16px;min-height:52px}
-.day.now{border:3px solid #17506B}
+.day{border:2px solid #BFC5AE;border-radius:12px;background:#fff;color:inherit;padding:6px 0;font-size:16px;min-height:52px}
+.day.now{border:3px solid #5E6B2F}
 .dark body,body.dark{background:#000;color:#F2EBDD}
 .dark .sub{color:#B8AD98}
 .dark .tile,.dark .big,.dark .chip.on{background:#E8DCC4!important;color:#1F2A2E!important;border-color:#E8DCC4}
@@ -101,10 +102,10 @@ function pv(kind,title,sub){
 return back+`<h1>${title}</h1><div class="sub">${sub}</div>`+S[kind].map((p,i)=>`<div class="card"><b>${esc(p.name)}</b><span>${esc(p.phone)}</span><button class="small" onclick="del('${kind}',${i})">Retirer</button></div>`).join('')+
 `<div class="card"><label>Prénom<input id="pn"></label><label>Téléphone<input id="pp" type="tel" inputmode="tel"></label><button class="big" onclick="addP('${kind}')">Ajouter</button></div>`}
 const V={
-home(){return '<div><div class="sub">Bonjour</div><h1>Que voulez-vous faire ?</h1></div><div class="grid">'+TILES.map((x,n)=>`<button class="tile${n?'':' p'}" onclick="go('${x.v}')">${svg(x.i,n?'#17506B':'#fff')}<span>${x.t}<small>${x.s}</small></span></button>`).join('')+'</div>'},
+home(){return '<div><div class="sub">Bonjour</div><h1>Que voulez-vous faire ?</h1></div><div class="grid">'+TILES.map((x,n)=>`<button class="tile${n?'':' p'}" onclick="go('${x.v}')">${svg(x.i,n?'#5E6B2F':'#fff')}<span>${x.t}<small>${x.s}</small></span></button>`).join('')+'</div>'},
 add(){return back+`<h1>Ajouter un médicament</h1>
 <button class="big" onclick="tmp.mode='box';$('#f').click()">Photographier la boîte</button>
-<button class="big" style="background:#fff;color:#17506B;border:2px solid #17506B" onclick="tmp.mode='rx';$('#f').click()">Photographier l’ordonnance</button>
+<button class="big" style="background:#fff;color:#5E6B2F;border:2px solid #5E6B2F" onclick="tmp.mode='rx';$('#f').click()">Photographier l’ordonnance</button>
 <input type="file" id="f" accept="image/*" capture="environment" hidden onchange="onPhoto(this,tmp.mode)">
 <div class="sub" id="scanmsg">La photo est lue sur votre téléphone. Vérifiez toujours les valeurs.</div>
 <div id="cand" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -128,7 +129,7 @@ return `<div class="sub">Rappel · ${hm(x.t)}</div><div class="hero">C’est l�
 alert(){const x=doses().find(d=>d.k===tmp.key);
 if(!S.proches.length)return back+'<h1>Pas pris</h1><div class="card">Ajoutez d’abord un proche à prévenir.</div><button class="big" onclick="go(\'proches\')">Mes proches</button>';
 const msg=encodeURIComponent('Bonjour, je n’ai pas pris mon médicament'+(x?' ('+x.m.name+' de '+hm(x.t)+')':'')+'.');
-return '<h1>Prévenir un proche ?</h1><div class="sub">Un message SMS s’ouvre, il ne reste qu’à l’envoyer.</div>'+S.proches.map(p=>`<a class="big" href="sms:${p.phone.replace(/\s/g,'')}?body=${msg}">SMS à ${esc(p.name)}</a>`).join('')+'<button class="big" style="background:#fff;color:#1F2A2E;border:2px solid #CFC8B8" onclick="go(\'cal\')">Non merci</button>'},
+return '<h1>Prévenir un proche ?</h1><div class="sub">Un message SMS s’ouvre, il ne reste qu’à l’envoyer.</div>'+S.proches.map(p=>`<a class="big" href="sms:${p.phone.replace(/\s/g,'')}?body=${msg}">SMS à ${esc(p.name)}</a>`).join('')+'<button class="big" style="background:#fff;color:#1F2A2E;border:2px solid #BFC5AE" onclick="go(\'cal\')">Non merci</button>'},
 proches(){return pv('proches','Mes proches','Ils sont prévenus par SMS si vous répondez « Pas pris ».')},
 famille(){return pv('famille','Famille','Coordonnées des membres de la famille.')},
 meds(){return back+'<h1>Mes médicaments</h1>'+(S.meds.length?S.meds.map((m,i)=>`<div class="card"><b>${esc(m.name)}</b><span>Péremption : ${fm(m.expiry)} · <span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}</span></span><span class="sub">${m.phases.map(p=>p.days+' j × '+p.times.length+'/jour'+(p.every>1?' (tous les '+p.every+' j)':'')).join(' puis ')}</span><span>Stock : ${m.stock==null?'non renseigné':m.stock+' cp'+(left(m)<999?' · env. '+left(m)+' j':'')}</span><button class="small" onclick="setStock(${i})">Mettre à jour le stock</button><button class="small" onclick="delMed(${i})">Retirer</button></div>`).join(''):'<div class="card">Aucun médicament pour l’instant.</div>')},
@@ -139,11 +140,11 @@ for(let j=1;j<=n;j++){const ds=ymd(new Date(y,mo,j)),on=pillOn(ds),mk=on===null?
 c+=`<button class="day${ds===today()?' now':''}" onclick="togglePill('${ds}')">${j}<br><b>${mk}</b></button>`}
 return back+'<h1>Pilule contraceptive</h1>'+`<div class="card"><div class="row" style="border:0;padding:0;background:none"><button class="small" onclick="tmp.mo=(tmp.mo||0)-1;render()">←</button><b>${d.toLocaleDateString(L,{month:'long',year:'numeric'})}</b><button class="small" onclick="tmp.mo=(tmp.mo||0)+1;render()">→</button></div><div class="cal">${c}</div><div class="sub">✓ pris · ✗ oublié · — pause</div></div>`+(S.pill?'<button class="big go" onclick="setPill(today(),true);render()">J’ai pris ma pilule aujourd’hui</button>':'')+`<div class="card"><label>Heure de prise<input id="pt" type="time" value="${p.time}"></label><label>Début de la plaquette<input id="ps" type="date" value="${p.start}"></label><label>Type de plaquette<select id="pr">${['21,7','24,4','28,0'].map(v=>`<option value="${v}"${v===p.a+','+p.b?' selected':''}>${v.replace(',',' + ')}</option>`).join('')}</select></label><button class="big" onclick="savePill()">Enregistrer</button></div>`},
 settings(){const P=S.patient,f=(id,l,v,ty)=>`<label>${l}<input id="${id}" value="${esc(v||'')}"${ty?` type="${ty}"`:''}></label>`,ch=(a,cur,fn)=>'<div class="chips">'+a.map(([v,l])=>`<button class="chip${v===cur?' on':''}" onclick="${fn}('${v}')">${l}</button>`).join('')+'</div>';
-return back+'<h1>Paramètres</h1>'+`<div class="card"><b>Coordonnées patient</b>${f('pn','Prénom et nom',P.name)}${f('pb','Date de naissance',P.birth,'date')}${f('pf','Téléphone',P.phone,'tel')}${f('pa','Adresse',P.addr)}${f('pd','Médecin traitant',P.doc)}<button class="big" onclick="savePat()">Enregistrer</button></div><div class="card"><b>Langue</b>${ch([['fr','Français'],['it','Italiano'],['en','English'],['de','Deutsch']],S.set.lang,'setLang')}</div><div class="card"><b>Apparence</b>${ch([['0','Clair'],['1','Sombre']],S.set.dark?'1':'0','setDark')}</div>`},
+return back+'<h1>Paramètres</h1>'+`<div class="card"><b>Coordonnées patient</b>${f('pn','Prénom et nom',P.name)}${f('pb','Date de naissance',P.birth,'date')}${f('pf','Téléphone',P.phone,'tel')}${f('pa','Adresse',P.addr)}${f('pd','Médecin traitant',P.doc)}<button class="big" onclick="savePat()">Enregistrer</button></div><div class="card"><b>Langue</b>${ch([['fr','Français'],['it','Italiano'],['en','English'],['de','Deutsch'],['sq','Shqip']],S.set.lang,'setLang')}</div><div class="card"><b>Apparence</b>${ch([['0','Clair'],['1','Sombre']],S.set.dark?'1':'0','setDark')}</div>`},
 call(){const all=S.proches.concat(S.famille);return back+'<h1>Appeler</h1>'+(all.length?all.map(p=>`<a class="big" href="tel:${p.phone.replace(/\s/g,'')}">${esc(p.name)}</a>`).join(''):'<div class="card">Ajoutez d’abord un proche ou un membre de la famille.</div>')}
 };
 function stop(){}
-const LOC={fr:'fr-CH',it:'it-CH',en:'en-GB',de:'de-CH'};
+const LOC={fr:'fr-CH',it:'it-CH',en:'en-GB',de:'de-CH',sq:'sq-AL'};
 function pillOn(ds){const p=S.pill;if(!p)return null;const i=Math.round((new Date(ds+'T12:00')-new Date(p.start+'T12:00'))/864e5);return i<0?null:(i%(p.a+p.b))<p.a}
 const pillTaken=ds=>Object.keys(S.log).some(k=>k.startsWith(ds+'|pill|')&&S.log[k]==='pris');
 function setPill(ds,on){Object.keys(S.log).filter(k=>k.startsWith(ds+'|pill|')).forEach(k=>delete S.log[k]);if(on)S.log[ds+'|pill|'+(S.pill?S.pill.time:'21:00')]='pris';save()}
@@ -153,7 +154,9 @@ function savePat(){S.patient={name:$('#pn').value,birth:$('#pb').value,phone:$('
 function setLang(v){S.set.lang=v;save();render()}
 function setDark(v){S.set.dark=v==='1';save();render()}
 const TR={'Bonjour':['Buongiorno','Hello','Guten Tag'],'Que voulez-vous faire ?':['Cosa vuoi fare?','What would you like to do?','Was möchten Sie tun?'],'Ajouter':['Aggiungi','Add','Hinzufügen'],'Scanner une boîte':['Scansiona una scatola','Scan a box','Packung scannen'],'Calendrier':['Calendario','Calendar','Kalender'],'Prises et dates':['Assunzioni e date','Doses and dates','Einnahmen und Daten'],'Mes proches':['I miei cari','My loved ones','Meine Angehörigen'],'Ils m’aident':['Mi aiutano','They help me','Sie helfen mir'],'Famille':['Famiglia','Family','Familie'],'Coordonnées':['Recapiti','Contact details','Kontaktdaten'],'Mes médicaments':['I miei farmaci','My medicines','Meine Medikamente'],'Ma pharmacie':['La mia farmacia','My pharmacy','Meine Apotheke'],'Appeler':['Chiama','Call','Anrufen'],'Proche ou médecin':['Familiare o medico','Relative or doctor','Angehörige oder Arzt'],'Pilule':['Pillola','Pill','Pille'],'Paramètres':['Impostazioni','Settings','Einstellungen'],'Langue, thème':['Lingua, tema','Language, theme','Sprache, Design'],'← Accueil':['← Home','← Home','← Start'],'Ajouter un médicament':['Aggiungi un farmaco','Add a medicine','Medikament hinzufügen'],'Photographier la boîte':['Fotografa la scatola','Photograph the box','Packung fotografieren'],'Photographier l’ordonnance':['Fotografa la ricetta','Photograph the prescription','Rezept fotografieren'],'Nom':['Nome','Name','Name'],'Date de péremption':['Data di scadenza','Expiry date','Verfallsdatum'],'Schéma de prise':['Schema di assunzione','Dosing schedule','Einnahmeschema'],'+ Ajouter une phase':['+ Aggiungi una fase','+ Add a phase','+ Phase hinzufügen'],'Créer les rappels':['Crea i promemoria','Create reminders','Erinnerungen erstellen'],'Aujourd’hui':['Oggi','Today','Heute'],'C’est l’heure de votre médicament':['È ora del tuo farmaco','It’s time for your medicine','Zeit für Ihr Medikament'],'✓ J’ai pris':['✓ Preso','✓ Taken','✓ Genommen'],'✗ Pas pris':['✗ Non preso','✗ Not taken','✗ Nicht genommen'],'✓ Pris':['✓ Preso','✓ Taken','✓ Genommen'],'À prendre':['Da prendere','To take','Einzunehmen'],'Aucun rappel. Ajoutez un médicament.':['Nessun promemoria. Aggiungi un farmaco.','No reminders. Add a medicine.','Keine Erinnerungen. Medikament hinzufügen.'],'Péremptions':['Scadenze','Expiry dates','Verfallsdaten'],'À renouveler':['Da rinnovare','To renew','Zu erneuern'],'Retirer':['Rimuovi','Remove','Entfernen'],'Mettre à jour le stock':['Aggiorna la scorta','Update stock','Bestand aktualisieren'],'Prévenir un proche ?':['Avvisare un familiare?','Notify a relative?','Angehörige informieren?'],'Non merci':['No grazie','No thanks','Nein danke'],'Pilule contraceptive':['Pillola contraccettiva','Contraceptive pill','Antibabypille'],'Heure de prise':['Ora di assunzione','Time of intake','Einnahmezeit'],'Début de la plaquette':['Inizio del blister','Start of the pack','Beginn der Packung'],'Type de plaquette':['Tipo di blister','Pack type','Packungstyp'],'Enregistrer':['Salva','Save','Speichern'],'J’ai pris ma pilule aujourd’hui':['Ho preso la pillola oggi','I took my pill today','Ich habe heute die Pille genommen'],'✓ pris · ✗ oublié · — pause':['✓ preso · ✗ dimenticato · — pausa','✓ taken · ✗ missed · — break','✓ genommen · ✗ vergessen · — Pause'],'Coordonnées patient':['Dati del paziente','Patient details','Patientendaten'],'Langue':['Lingua','Language','Sprache'],'Apparence':['Aspetto','Appearance','Darstellung'],'Clair':['Chiaro','Light','Hell'],'Sombre':['Scuro','Dark','Dunkel'],'Prénom et nom':['Nome e cognome','First and last name','Vor- und Nachname'],'Date de naissance':['Data di nascita','Date of birth','Geburtsdatum'],'Téléphone':['Telefono','Phone','Telefon'],'Adresse':['Indirizzo','Address','Adresse'],'Médecin traitant':['Medico curante','Family doctor','Hausarzt']};
-function tr(){const i={it:0,en:1,de:2}[S.set.lang];if(i===undefined)return;const w=document.createTreeWalker($('#app'),NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const t=n.nodeValue.trim();if(TR[t])n.nodeValue=n.nodeValue.replace(t,TR[t][i])}}
+const SQ={'Bonjour':'Përshëndetje','Que voulez-vous faire ?':'Çfarë dëshironi të bëni?','Ajouter':'Shto','Scanner une boîte':'Skano një kuti','Calendrier':'Kalendari','Prises et dates':'Marrjet dhe datat','Mes proches':'Të afërmit e mi','Ils m’aident':'Ata më ndihmojnë','Famille':'Familja','Coordonnées':'Kontaktet','Mes médicaments':'Ilaçet e mia','Ma pharmacie':'Farmacia ime','Appeler':'Telefono','Proche ou médecin':'I afërm ose mjek','Pilule':'Pilula','Paramètres':'Cilësimet','Langue, thème':'Gjuha, pamja','← Accueil':'← Kryefaqja','Ajouter un médicament':'Shto një ilaç','Photographier la boîte':'Fotografo kutinë','Photographier l’ordonnance':'Fotografo recetën','Nom':'Emri','Date de péremption':'Data e skadencës','Schéma de prise':'Skema e marrjes','+ Ajouter une phase':'+ Shto një fazë','Créer les rappels':'Krijo kujtesat','Aujourd’hui':'Sot','C’est l’heure de votre médicament':'Është koha për ilaçin tuaj','✓ J’ai pris':'✓ E mora','✗ Pas pris':'✗ Nuk e mora','✓ Pris':'✓ Marrë','À prendre':'Për t’u marrë','Aucun rappel. Ajoutez un médicament.':'Asnjë kujtesë. Shtoni një ilaç.','Péremptions':'Skadencat','À renouveler':'Për rinovim','Retirer':'Hiq','Mettre à jour le stock':'Përditëso stokun','Prévenir un proche ?':'Të njoftojmë një të afërm?','Non merci':'Jo, faleminderit','Pilule contraceptive':'Pilula kontraceptive','Heure de prise':'Ora e marrjes','Début de la plaquette':'Fillimi i paketës','Type de plaquette':'Lloji i paketës','Enregistrer':'Ruaj','J’ai pris ma pilule aujourd’hui':'E mora pilulën sot','✓ pris · ✗ oublié · — pause':'✓ marrë · ✗ harruar · — pauzë','Coordonnées patient':'Të dhënat e pacientit','Langue':'Gjuha','Apparence':'Pamja','Clair':'E çelët','Sombre':'E errët','Prénom et nom':'Emri dhe mbiemri','Date de naissance':'Data e lindjes','Téléphone':'Telefoni','Adresse':'Adresa','Médecin traitant':'Mjeku i familjes'};
+Object.keys(TR).forEach(k=>{TR[k][3]=SQ[k]});
+function tr(){const i={it:0,en:1,de:2,sq:3}[S.set.lang];if(i===undefined)return;const w=document.createTreeWalker($('#app'),NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const t=n.nodeValue.trim();if(TR[t])n.nodeValue=n.nodeValue.replace(t,TR[t][i])}}
 const phRow=p=>`<div class="card ph"><label>Pendant (jours)<input class="d" type="number" min="1" value="${p.days}"></label><label>Tous les (jours)<input class="e" type="number" min="1" value="${p.every}"></label><label>Heures (ex. 08:00, 20:00)<input class="t" value="${p.times.join(', ')}"></label><label>Comprimés par prise<input class="q" type="number" min="0.5" step="0.5" value="${p.qty}"></label><button class="small" onclick="this.parentNode.remove()">Retirer la phase</button></div>`;
 const setPhases=a=>{$('#ph').innerHTML=a.map(phRow).join('')};
 const normT=t=>t.split(/[,; ]+/).filter(Boolean).map(x=>{const[h,m]=x.replace(/h/i,':').split(':');return String(+h).padStart(2,'0')+':'+String(+(m||0)).padStart(2,'0')});
