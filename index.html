@@ -15,24 +15,24 @@ button,input,a{font:inherit}
 h1{margin:0;font-size:32px;line-height:1.1}
 .sub{color:#4A575B}
 .grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:14px;min-height:620px}
-.tile{border:2px solid #5E6B2F;border-radius:22px;background:#5E6B2F;color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;text-align:left;font-size:24px;font-weight:700}
-.tile small{display:block;font-weight:400;font-size:16px;color:#EEF1E0}
-.tile.p{background:#4A5522;border-color:#4A5522;color:#fff}
+.tile{border:2px solid #4F6B66;border-radius:22px;background:#4F6B66;color:#fff;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;text-align:left;font-size:24px;font-weight:700}
+.tile small{display:block;font-weight:400;font-size:16px;color:#E6EEEC}
+.tile.p{background:#3E5753;border-color:#3E5753;color:#fff}
 .tile svg{stroke:#fff}
 .tile.p small{color:#fff}
-.card{background:#fff;border:2px solid #BFC5AE;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
-.big{display:block;text-align:center;text-decoration:none;border:0;border-radius:22px;background:#5E6B2F;color:#fff;font-size:26px;font-weight:700;padding:22px}
+.card{background:#fff;border:2px solid #BCC9C6;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.big{display:block;text-align:center;text-decoration:none;border:0;border-radius:22px;background:#4F6B66;color:#fff;font-size:26px;font-weight:700;padding:22px}
 .go{background:#14573A}
 .no{background:#B42318}
-.back{align-self:flex-start;border:0;background:none;color:#5E6B2F;font-size:20px;font-weight:700;padding:8px 0}
-.small{border:2px solid #BFC5AE;background:#fff;border-radius:14px;padding:10px 16px;font-size:18px;align-self:flex-start}
+.back{align-self:flex-start;border:0;background:none;color:#4F6B66;font-size:20px;font-weight:700;padding:8px 0}
+.small{border:2px solid #BCC9C6;background:#fff;border-radius:14px;padding:10px 16px;font-size:18px;align-self:flex-start}
 label{display:flex;flex-direction:column;gap:6px;font-weight:700}
-input,select{border:2px solid #BFC5AE;border-radius:16px;padding:14px;font-size:22px;background:#fff;width:100%}
+input,select{border:2px solid #BCC9C6;border-radius:16px;padding:14px;font-size:22px;background:#fff;width:100%}
 .chips{display:flex;gap:10px}
-.chip{flex:1;border:2px solid #BFC5AE;border-radius:18px;background:#fff;padding:18px 4px;font-size:22px;font-weight:700}
-.chip.on{background:#5E6B2F;border-color:#5E6B2F;color:#fff}
+.chip{flex:1;border:2px solid #BCC9C6;border-radius:18px;background:#fff;padding:18px 4px;font-size:22px;font-weight:700}
+.chip.on{background:#4F6B66;border-color:#4F6B66;color:#fff}
 .chip.on::before{content:'✓ '}
-.row{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:2px solid #BFC5AE;border-radius:20px;background:#fff;color:#1F2A2E;padding:16px;font-size:20px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:2px solid #BCC9C6;border-radius:20px;background:#fff;color:#1F2A2E;padding:16px;font-size:20px}
 .st{font-weight:700;text-align:right}
 .st.pris{color:#14573A}
 .st.pas{color:#B42318}
@@ -42,8 +42,8 @@ video{width:100%;border-radius:18px;background:#000}
 .flex1 .big{flex:1;display:flex;align-items:center;justify-content:center}
 .chips{flex-wrap:wrap}.chip{flex:1 1 40%}
 .cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
-.day{border:2px solid #BFC5AE;border-radius:12px;background:#fff;color:inherit;padding:6px 0;font-size:16px;min-height:52px}
-.day.now{border:3px solid #5E6B2F}
+.day{border:2px solid #BCC9C6;border-radius:12px;background:#fff;color:inherit;padding:6px 0;font-size:16px;min-height:52px}
+.day.now{border:3px solid #4F6B66}
 .dark body,body.dark{background:#000;color:#F2EBDD}
 .dark .sub{color:#B8AD98}
 .dark .tile,.dark .big,.dark .chip.on{background:#E8DCC4!important;color:#1F2A2E!important;border-color:#E8DCC4}
@@ -102,10 +102,10 @@ function pv(kind,title,sub){
 return back+`<h1>${title}</h1><div class="sub">${sub}</div>`+S[kind].map((p,i)=>`<div class="card"><b>${esc(p.name)}</b><span>${esc(p.phone)}</span><button class="small" onclick="del('${kind}',${i})">Retirer</button></div>`).join('')+
 `<div class="card"><label>Prénom<input id="pn"></label><label>Téléphone<input id="pp" type="tel" inputmode="tel"></label><button class="big" onclick="addP('${kind}')">Ajouter</button></div>`}
 const V={
-home(){return '<div><div class="sub">Bonjour</div><h1>Que voulez-vous faire ?</h1></div><div class="grid">'+TILES.map((x,n)=>`<button class="tile${n?'':' p'}" onclick="go('${x.v}')">${svg(x.i,n?'#5E6B2F':'#fff')}<span>${x.t}<small>${x.s}</small></span></button>`).join('')+'</div><button class="small" style="align-self:center" onclick="go(\'about\')">'+'Qui sommes-nous ?'+'</button>'},
+home(){return '<div><div class="sub">Bonjour</div><h1>Que voulez-vous faire ?</h1></div><div class="grid">'+TILES.map((x,n)=>`<button class="tile${n?'':' p'}" onclick="go('${x.v}')">${svg(x.i,n?'#4F6B66':'#fff')}<span>${x.t}<small>${x.s}</small></span></button>`).join('')+'</div><button class="small" style="align-self:center" onclick="go(\'about\')">'+'Qui sommes-nous ?'+'</button>'},
 add(){return back+`<h1>Ajouter un médicament</h1>
 <button class="big" onclick="tmp.mode='box';$('#f').click()">Photographier la boîte</button>
-<button class="big" style="background:#fff;color:#5E6B2F;border:2px solid #5E6B2F" onclick="tmp.mode='rx';$('#f').click()">Photographier l’ordonnance</button>
+<button class="big" style="background:#fff;color:#4F6B66;border:2px solid #4F6B66" onclick="tmp.mode='rx';$('#f').click()">Photographier l’ordonnance</button>
 <input type="file" id="f" accept="image/*" capture="environment" hidden onchange="onPhoto(this,tmp.mode)">
 <div class="sub" id="scanmsg">La photo est lue sur votre téléphone. Vérifiez toujours les valeurs.</div>
 <div id="cand" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -129,7 +129,7 @@ return `<div class="sub">Rappel · ${hm(x.t)}</div><div class="hero">C’est l�
 alert(){const x=doses().find(d=>d.k===tmp.key);
 if(!S.proches.length)return back+'<h1>Pas pris</h1><div class="card">Ajoutez d’abord un proche à prévenir.</div><button class="big" onclick="go(\'proches\')">Mes proches</button>';
 const msg=encodeURIComponent('Bonjour, je n’ai pas pris mon médicament'+(x?' ('+x.m.name+' de '+hm(x.t)+')':'')+'.');
-return '<h1>Prévenir un proche ?</h1><div class="sub">Un message SMS s’ouvre, il ne reste qu’à l’envoyer.</div>'+S.proches.map(p=>`<a class="big" href="sms:${p.phone.replace(/\s/g,'')}?body=${msg}">SMS à ${esc(p.name)}</a>`).join('')+'<button class="big" style="background:#fff;color:#1F2A2E;border:2px solid #BFC5AE" onclick="go(\'cal\')">Non merci</button>'},
+return '<h1>Prévenir un proche ?</h1><div class="sub">Un message SMS s’ouvre, il ne reste qu’à l’envoyer.</div>'+S.proches.map(p=>`<a class="big" href="sms:${p.phone.replace(/\s/g,'')}?body=${msg}">SMS à ${esc(p.name)}</a>`).join('')+'<button class="big" style="background:#fff;color:#1F2A2E;border:2px solid #BCC9C6" onclick="go(\'cal\')">Non merci</button>'},
 proches(){return pv('proches','Mes proches','Ils sont prévenus par SMS si vous répondez « Pas pris ».')},
 famille(){return pv('famille','Famille','Coordonnées des membres de la famille.')},
 meds(){return back+'<h1>Mes médicaments</h1>'+(S.meds.length?S.meds.map((m,i)=>`<div class="card"><b>${esc(m.name)}</b><span>Péremption : ${fm(m.expiry)} · <span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}</span></span><span class="sub">${m.phases.map(p=>p.days+' j × '+p.times.length+'/jour'+(p.every>1?' (tous les '+p.every+' j)':'')).join(' puis ')}</span><span>Stock : ${m.stock==null?'non renseigné':m.stock+' cp'+(left(m)<999?' · env. '+left(m)+' j':'')}</span><button class="small" onclick="setStock(${i})">Mettre à jour le stock</button><button class="small" onclick="delMed(${i})">Retirer</button></div>`).join(''):'<div class="card">Aucun médicament pour l’instant.</div>')},
