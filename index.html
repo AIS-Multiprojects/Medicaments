@@ -14,7 +14,7 @@ button,input,a{font:inherit}
 .scr{min-height:100dvh;padding:max(28px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
 h1{margin:0;font-size:32px;line-height:1.1}
 .sub{color:#4A575B}
-.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:14px;min-height:480px}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(4,1fr);gap:14px;min-height:620px}
 .tile{border:2px solid #CFC8B8;border-radius:22px;background:#fff;color:#1F2A2E;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;text-align:left;font-size:24px;font-weight:700}
 .tile small{display:block;font-weight:400;font-size:16px;color:#4A575B}
 .tile.p{background:#17506B;border-color:#17506B;color:#fff}
@@ -26,7 +26,7 @@ h1{margin:0;font-size:32px;line-height:1.1}
 .back{align-self:flex-start;border:0;background:none;color:#17506B;font-size:20px;font-weight:700;padding:8px 0}
 .small{border:2px solid #CFC8B8;background:#fff;border-radius:14px;padding:10px 16px;font-size:18px;align-self:flex-start}
 label{display:flex;flex-direction:column;gap:6px;font-weight:700}
-input{border:2px solid #CFC8B8;border-radius:16px;padding:14px;font-size:22px;background:#fff;width:100%}
+input,select{border:2px solid #CFC8B8;border-radius:16px;padding:14px;font-size:22px;background:#fff;width:100%}
 .chips{display:flex;gap:10px}
 .chip{flex:1;border:2px solid #CFC8B8;border-radius:18px;background:#fff;padding:18px 4px;font-size:22px;font-weight:700}
 .chip.on{background:#17506B;border-color:#17506B;color:#fff}
@@ -39,6 +39,20 @@ video{width:100%;border-radius:18px;background:#000}
 .hero{font-size:36px;font-weight:700;line-height:1.1}
 .flex1{flex:1;display:flex;flex-direction:column;gap:16px}
 .flex1 .big{flex:1;display:flex;align-items:center;justify-content:center}
+.chips{flex-wrap:wrap}.chip{flex:1 1 40%}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center}
+.day{border:2px solid #CFC8B8;border-radius:12px;background:#fff;color:inherit;padding:6px 0;font-size:16px;min-height:52px}
+.day.now{border:3px solid #17506B}
+.dark body,body.dark{background:#000;color:#F2EBDD}
+.dark .sub{color:#B8AD98}
+.dark .tile,.dark .big,.dark .chip.on{background:#E8DCC4!important;color:#1F2A2E!important;border-color:#E8DCC4}
+.dark .big.go{background:#14573A!important;color:#fff!important}
+.dark .big.no{background:#B42318!important;color:#fff!important}
+.dark .tile small{color:#4A4030}
+.dark .tile svg{stroke:#1F2A2E}
+.dark .card,.dark .row,.dark .small,.dark .chip,.dark input,.dark select,.dark .day{background:#161616;color:#F2EBDD;border-color:#4A4438}
+.dark .back{color:#E8DCC4}
+.dark .day.now{border-color:#E8DCC4}
 </style>
 </head>
 <body>
@@ -60,6 +74,8 @@ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16
 pro:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.5 0 4 1.8 4 4.5"/>',
 fam:'<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>',
 med:'<path d="M9 3h6v3H9z"/><path d="M7 6h10v14a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/><path d="M7 12h10"/>',
+pil:'<rect x="3" y="8" width="18" height="8" rx="4"/><path d="M12 8v8"/>',
+set:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
 tel:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>'
 };
 const svg=(k,c)=>`<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
@@ -69,16 +85,18 @@ const TILES=[
 {v:'proches',t:'Mes proches',s:'Ils m’aident',i:'pro'},
 {v:'famille',t:'Famille',s:'Coordonnées',i:'fam'},
 {v:'meds',t:'Mes médicaments',s:'Ma pharmacie',i:'med'},
+{v:'pill',t:'Pilule',s:'Calendrier',i:'pil'},
+{v:'settings',t:'Paramètres',s:'Langue, thème',i:'set'},
 {v:'call',t:'Appeler',s:'Proche ou médecin',i:'tel'}];
 const back='<button class="back" onclick="go(\'home\')">← Accueil</button>';
-function dosesOn(ds){const o=[];S.meds.forEach(m=>{const i=Math.round((new Date(ds+'T12:00')-new Date(m.start+'T12:00'))/864e5);if(i<0)return;let a=0;for(const p of m.phases){if(i<a+p.days){if((i-a)%p.every===0)p.times.forEach(t=>o.push({k:ds+'|'+m.id+'|'+t,m,t,q:p.qty}));break}a+=p.days}});return o.sort((a,b)=>a.t.localeCompare(b.t))}
+function dosesOn(ds){const o=[];S.meds.forEach(m=>{const i=Math.round((new Date(ds+'T12:00')-new Date(m.start+'T12:00'))/864e5);if(i<0)return;let a=0;for(const p of m.phases){if(i<a+p.days){if((i-a)%p.every===0)p.times.forEach(t=>o.push({k:ds+'|'+m.id+'|'+t,m,t,q:p.qty}));break}a+=p.days}});if(pillOn(ds))o.push({k:ds+'|pill|'+S.pill.time,m:{id:'pill',name:'Pilule contraceptive',stock:null,phases:[]},t:S.pill.time,q:1});return o.sort((a,b)=>a.t.localeCompare(b.t))}
 const doses=()=>dosesOn(today());
 function left(m){if(m.stock==null)return null;let s=m.stock;for(let i=0;i<400;i++){const d=new Date();d.setDate(d.getDate()+i);const ds=ymd(d);for(const x of dosesOn(ds)){if(x.m!==m||(i===0&&S.log[x.k]))continue;s-=x.q;if(s<0)return i}}return 999}
 function exp(e){if(!e)return['',''];const[y,m]=e.split('-').map(Number);const d=Math.ceil((new Date(y,m,0,23,59)-new Date())/864e5);return d<0?['Expiré','pas']:d<=60?['Expire bientôt','']:['OK','pris']}
 const fm=e=>e?e.slice(5)+'/'+e.slice(0,4):'—';
 const hm=t=>t.replace(':',' h ');
 function go(v,t){stop();view=v;tmp=t||{};render()}
-function render(){const f=V[view]||V.home;$('#app').innerHTML='<div class="scr">'+f()+'</div>';window.scrollTo(0,0)}
+function render(){const f=V[view]||V.home;$('#app').innerHTML='<div class="scr">'+f()+'</div>';document.body.classList.toggle('dark',!!S.set.dark);document.documentElement.lang=S.set.lang;tr();window.scrollTo(0,0)}
 function pv(kind,title,sub){
 return back+`<h1>${title}</h1><div class="sub">${sub}</div>`+S[kind].map((p,i)=>`<div class="card"><b>${esc(p.name)}</b><span>${esc(p.phone)}</span><button class="small" onclick="del('${kind}',${i})">Retirer</button></div>`).join('')+
 `<div class="card"><label>Prénom<input id="pn"></label><label>Téléphone<input id="pp" type="tel" inputmode="tel"></label><button class="big" onclick="addP('${kind}')">Ajouter</button></div>`}
@@ -114,9 +132,28 @@ return '<h1>Prévenir un proche ?</h1><div class="sub">Un message SMS s’ouvre,
 proches(){return pv('proches','Mes proches','Ils sont prévenus par SMS si vous répondez « Pas pris ».')},
 famille(){return pv('famille','Famille','Coordonnées des membres de la famille.')},
 meds(){return back+'<h1>Mes médicaments</h1>'+(S.meds.length?S.meds.map((m,i)=>`<div class="card"><b>${esc(m.name)}</b><span>Péremption : ${fm(m.expiry)} · <span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}</span></span><span class="sub">${m.phases.map(p=>p.days+' j × '+p.times.length+'/jour'+(p.every>1?' (tous les '+p.every+' j)':'')).join(' puis ')}</span><span>Stock : ${m.stock==null?'non renseigné':m.stock+' cp'+(left(m)<999?' · env. '+left(m)+' j':'')}</span><button class="small" onclick="setStock(${i})">Mettre à jour le stock</button><button class="small" onclick="delMed(${i})">Retirer</button></div>`).join(''):'<div class="card">Aucun médicament pour l’instant.</div>')},
+pill(){const p=S.pill||{time:'21:00',start:today(),a:21,b:7},L=LOC[S.set.lang],d=new Date();d.setDate(1);d.setMonth(d.getMonth()+(tmp.mo||0));
+const y=d.getFullYear(),mo=d.getMonth(),n=new Date(y,mo+1,0).getDate(),off=(d.getDay()+6)%7;
+let c=[...Array(7)].map((_,i)=>'<div class="sub">'+new Date(2024,0,1+i).toLocaleDateString(L,{weekday:'narrow'})+'</div>').join('')+'<div></div>'.repeat(off);
+for(let j=1;j<=n;j++){const ds=ymd(new Date(y,mo,j)),on=pillOn(ds),mk=on===null?'':on===false?'—':pillTaken(ds)?'✓':ds<today()?'✗':'';
+c+=`<button class="day${ds===today()?' now':''}" onclick="togglePill('${ds}')">${j}<br><b>${mk}</b></button>`}
+return back+'<h1>Pilule contraceptive</h1>'+`<div class="card"><div class="row" style="border:0;padding:0;background:none"><button class="small" onclick="tmp.mo=(tmp.mo||0)-1;render()">←</button><b>${d.toLocaleDateString(L,{month:'long',year:'numeric'})}</b><button class="small" onclick="tmp.mo=(tmp.mo||0)+1;render()">→</button></div><div class="cal">${c}</div><div class="sub">✓ pris · ✗ oublié · — pause</div></div>`+(S.pill?'<button class="big go" onclick="setPill(today(),true);render()">J’ai pris ma pilule aujourd’hui</button>':'')+`<div class="card"><label>Heure de prise<input id="pt" type="time" value="${p.time}"></label><label>Début de la plaquette<input id="ps" type="date" value="${p.start}"></label><label>Type de plaquette<select id="pr">${['21,7','24,4','28,0'].map(v=>`<option value="${v}"${v===p.a+','+p.b?' selected':''}>${v.replace(',',' + ')}</option>`).join('')}</select></label><button class="big" onclick="savePill()">Enregistrer</button></div>`},
+settings(){const P=S.patient,f=(id,l,v,ty)=>`<label>${l}<input id="${id}" value="${esc(v||'')}"${ty?` type="${ty}"`:''}></label>`,ch=(a,cur,fn)=>'<div class="chips">'+a.map(([v,l])=>`<button class="chip${v===cur?' on':''}" onclick="${fn}('${v}')">${l}</button>`).join('')+'</div>';
+return back+'<h1>Paramètres</h1>'+`<div class="card"><b>Coordonnées patient</b>${f('pn','Prénom et nom',P.name)}${f('pb','Date de naissance',P.birth,'date')}${f('pf','Téléphone',P.phone,'tel')}${f('pa','Adresse',P.addr)}${f('pd','Médecin traitant',P.doc)}<button class="big" onclick="savePat()">Enregistrer</button></div><div class="card"><b>Langue</b>${ch([['fr','Français'],['it','Italiano'],['en','English'],['de','Deutsch']],S.set.lang,'setLang')}</div><div class="card"><b>Apparence</b>${ch([['0','Clair'],['1','Sombre']],S.set.dark?'1':'0','setDark')}</div>`},
 call(){const all=S.proches.concat(S.famille);return back+'<h1>Appeler</h1>'+(all.length?all.map(p=>`<a class="big" href="tel:${p.phone.replace(/\s/g,'')}">${esc(p.name)}</a>`).join(''):'<div class="card">Ajoutez d’abord un proche ou un membre de la famille.</div>')}
 };
 function stop(){}
+const LOC={fr:'fr-CH',it:'it-CH',en:'en-GB',de:'de-CH'};
+function pillOn(ds){const p=S.pill;if(!p)return null;const i=Math.round((new Date(ds+'T12:00')-new Date(p.start+'T12:00'))/864e5);return i<0?null:(i%(p.a+p.b))<p.a}
+const pillTaken=ds=>Object.keys(S.log).some(k=>k.startsWith(ds+'|pill|')&&S.log[k]==='pris');
+function setPill(ds,on){Object.keys(S.log).filter(k=>k.startsWith(ds+'|pill|')).forEach(k=>delete S.log[k]);if(on)S.log[ds+'|pill|'+(S.pill?S.pill.time:'21:00')]='pris';save()}
+function togglePill(ds){if(ds>today())return;setPill(ds,!pillTaken(ds));render()}
+function savePill(){const t=$('#pt').value,st=$('#ps').value;if(!t||!st){alert('Indiquez l’heure et la date de début.');return}const ab=$('#pr').value.split(',');S.pill={time:t,start:st,a:+ab[0],b:+ab[1]};save();render()}
+function savePat(){S.patient={name:$('#pn').value,birth:$('#pb').value,phone:$('#pf').value,addr:$('#pa').value,doc:$('#pd').value};save();render()}
+function setLang(v){S.set.lang=v;save();render()}
+function setDark(v){S.set.dark=v==='1';save();render()}
+const TR={'Bonjour':['Buongiorno','Hello','Guten Tag'],'Que voulez-vous faire ?':['Cosa vuoi fare?','What would you like to do?','Was möchten Sie tun?'],'Ajouter':['Aggiungi','Add','Hinzufügen'],'Scanner une boîte':['Scansiona una scatola','Scan a box','Packung scannen'],'Calendrier':['Calendario','Calendar','Kalender'],'Prises et dates':['Assunzioni e date','Doses and dates','Einnahmen und Daten'],'Mes proches':['I miei cari','My loved ones','Meine Angehörigen'],'Ils m’aident':['Mi aiutano','They help me','Sie helfen mir'],'Famille':['Famiglia','Family','Familie'],'Coordonnées':['Recapiti','Contact details','Kontaktdaten'],'Mes médicaments':['I miei farmaci','My medicines','Meine Medikamente'],'Ma pharmacie':['La mia farmacia','My pharmacy','Meine Apotheke'],'Appeler':['Chiama','Call','Anrufen'],'Proche ou médecin':['Familiare o medico','Relative or doctor','Angehörige oder Arzt'],'Pilule':['Pillola','Pill','Pille'],'Paramètres':['Impostazioni','Settings','Einstellungen'],'Langue, thème':['Lingua, tema','Language, theme','Sprache, Design'],'← Accueil':['← Home','← Home','← Start'],'Ajouter un médicament':['Aggiungi un farmaco','Add a medicine','Medikament hinzufügen'],'Photographier la boîte':['Fotografa la scatola','Photograph the box','Packung fotografieren'],'Photographier l’ordonnance':['Fotografa la ricetta','Photograph the prescription','Rezept fotografieren'],'Nom':['Nome','Name','Name'],'Date de péremption':['Data di scadenza','Expiry date','Verfallsdatum'],'Schéma de prise':['Schema di assunzione','Dosing schedule','Einnahmeschema'],'+ Ajouter une phase':['+ Aggiungi una fase','+ Add a phase','+ Phase hinzufügen'],'Créer les rappels':['Crea i promemoria','Create reminders','Erinnerungen erstellen'],'Aujourd’hui':['Oggi','Today','Heute'],'C’est l’heure de votre médicament':['È ora del tuo farmaco','It’s time for your medicine','Zeit für Ihr Medikament'],'✓ J’ai pris':['✓ Preso','✓ Taken','✓ Genommen'],'✗ Pas pris':['✗ Non preso','✗ Not taken','✗ Nicht genommen'],'✓ Pris':['✓ Preso','✓ Taken','✓ Genommen'],'À prendre':['Da prendere','To take','Einzunehmen'],'Aucun rappel. Ajoutez un médicament.':['Nessun promemoria. Aggiungi un farmaco.','No reminders. Add a medicine.','Keine Erinnerungen. Medikament hinzufügen.'],'Péremptions':['Scadenze','Expiry dates','Verfallsdaten'],'À renouveler':['Da rinnovare','To renew','Zu erneuern'],'Retirer':['Rimuovi','Remove','Entfernen'],'Mettre à jour le stock':['Aggiorna la scorta','Update stock','Bestand aktualisieren'],'Prévenir un proche ?':['Avvisare un familiare?','Notify a relative?','Angehörige informieren?'],'Non merci':['No grazie','No thanks','Nein danke'],'Pilule contraceptive':['Pillola contraccettiva','Contraceptive pill','Antibabypille'],'Heure de prise':['Ora di assunzione','Time of intake','Einnahmezeit'],'Début de la plaquette':['Inizio del blister','Start of the pack','Beginn der Packung'],'Type de plaquette':['Tipo di blister','Pack type','Packungstyp'],'Enregistrer':['Salva','Save','Speichern'],'J’ai pris ma pilule aujourd’hui':['Ho preso la pillola oggi','I took my pill today','Ich habe heute die Pille genommen'],'✓ pris · ✗ oublié · — pause':['✓ preso · ✗ dimenticato · — pausa','✓ taken · ✗ missed · — break','✓ genommen · ✗ vergessen · — Pause'],'Coordonnées patient':['Dati del paziente','Patient details','Patientendaten'],'Langue':['Lingua','Language','Sprache'],'Apparence':['Aspetto','Appearance','Darstellung'],'Clair':['Chiaro','Light','Hell'],'Sombre':['Scuro','Dark','Dunkel'],'Prénom et nom':['Nome e cognome','First and last name','Vor- und Nachname'],'Date de naissance':['Data di nascita','Date of birth','Geburtsdatum'],'Téléphone':['Telefono','Phone','Telefon'],'Adresse':['Indirizzo','Address','Adresse'],'Médecin traitant':['Medico curante','Family doctor','Hausarzt']};
+function tr(){const i={it:0,en:1,de:2}[S.set.lang];if(i===undefined)return;const w=document.createTreeWalker($('#app'),NodeFilter.SHOW_TEXT);let n;while(n=w.nextNode()){const t=n.nodeValue.trim();if(TR[t])n.nodeValue=n.nodeValue.replace(t,TR[t][i])}}
 const phRow=p=>`<div class="card ph"><label>Pendant (jours)<input class="d" type="number" min="1" value="${p.days}"></label><label>Tous les (jours)<input class="e" type="number" min="1" value="${p.every}"></label><label>Heures (ex. 08:00, 20:00)<input class="t" value="${p.times.join(', ')}"></label><label>Comprimés par prise<input class="q" type="number" min="0.5" step="0.5" value="${p.qty}"></label><button class="small" onclick="this.parentNode.remove()">Retirer la phase</button></div>`;
 const setPhases=a=>{$('#ph').innerHTML=a.map(phRow).join('')};
 const normT=t=>t.split(/[,; ]+/).filter(Boolean).map(x=>{const[h,m]=x.replace(/h/i,':').split(':');return String(+h).padStart(2,'0')+':'+String(+(m||0)).padStart(2,'0')});
@@ -154,6 +191,7 @@ const x=doses().find(d=>d.t<=t&&!S.log[d.k]&&!prompted.has(d.k));
 if(x){prompted.add(x.k);notify(x);go('remind',{key:x.k})}},15000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
 S.meds.forEach(m=>{if(!m.phases){m.phases=[{days:3650,every:1,qty:1,times:m.slots.map(x=>SLOTS[x][1])}];m.start=today();if(m.stock===undefined)m.stock=null}});
+S.set=S.set||{lang:'fr',dark:false};S.patient=S.patient||{};
 save();
 render();
 </script>
