@@ -52,7 +52,8 @@ let view='home',tmp={};
 const prompted=new Set();
 const SLOTS={matin:['Matin','08:00'],midi:['Midi','12:00'],soir:['Soir','19:00']};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const ymd=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function today(){return ymd(new Date())}
 const IC={
 add:'<path d="M12 5v14M5 12h14"/>',
 cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
@@ -70,7 +71,9 @@ const TILES=[
 {v:'meds',t:'Mes médicaments',s:'Ma pharmacie',i:'med'},
 {v:'call',t:'Appeler',s:'Proche ou médecin',i:'tel'}];
 const back='<button class="back" onclick="go(\'home\')">← Accueil</button>';
-function doses(){const d=today(),o=[];S.meds.forEach(m=>m.slots.forEach(s=>o.push({k:d+'|'+m.id+'|'+s,m,s,t:SLOTS[s][1]})));return o.sort((a,b)=>a.t.localeCompare(b.t))}
+function dosesOn(ds){const o=[];S.meds.forEach(m=>{const i=Math.round((new Date(ds+'T12:00')-new Date(m.start+'T12:00'))/864e5);if(i<0)return;let a=0;for(const p of m.phases){if(i<a+p.days){if((i-a)%p.every===0)p.times.forEach(t=>o.push({k:ds+'|'+m.id+'|'+t,m,t,q:p.qty}));break}a+=p.days}});return o.sort((a,b)=>a.t.localeCompare(b.t))}
+const doses=()=>dosesOn(today());
+function left(m){if(m.stock==null)return null;let s=m.stock;for(let i=0;i<400;i++){const d=new Date();d.setDate(d.getDate()+i);const ds=ymd(d);for(const x of dosesOn(ds)){if(x.m!==m||(i===0&&S.log[x.k]))continue;s-=x.q;if(s<0)return i}}return 999}
 function exp(e){if(!e)return['',''];const[y,m]=e.split('-').map(Number);const d=Math.ceil((new Date(y,m,0,23,59)-new Date())/864e5);return d<0?['Expiré','pas']:d<=60?['Expire bientôt','']:['OK','pris']}
 const fm=e=>e?e.slice(5)+'/'+e.slice(0,4):'—';
 const hm=t=>t.replace(':',' h ');
@@ -82,49 +85,58 @@ return back+`<h1>${title}</h1><div class="sub">${sub}</div>`+S[kind].map((p,i)=>
 const V={
 home(){return '<div><div class="sub">Bonjour</div><h1>Que voulez-vous faire ?</h1></div><div class="grid">'+TILES.map((x,n)=>`<button class="tile${n?'':' p'}" onclick="go('${x.v}')">${svg(x.i,n?'#17506B':'#fff')}<span>${x.t}<small>${x.s}</small></span></button>`).join('')+'</div>'},
 add(){return back+`<h1>Ajouter un médicament</h1>
-<button class="big" onclick="scan()">Scanner la boîte</button>
-<video id="v" playsinline muted hidden></video>
-<div class="sub" id="scanmsg">Le scan lit le code de la boîte. Saisissez le nom à la main.</div>
+<button class="big" onclick="tmp.mode='box';$('#f').click()">Photographier la boîte</button>
+<button class="big" style="background:#fff;color:#17506B;border:2px solid #17506B" onclick="tmp.mode='rx';$('#f').click()">Photographier l’ordonnance</button>
+<input type="file" id="f" accept="image/*" capture="environment" hidden onchange="onPhoto(this,tmp.mode)">
+<div class="sub" id="scanmsg">La photo est lue sur votre téléphone. Vérifiez toujours les valeurs.</div>
+<div id="cand" style="display:flex;flex-direction:column;gap:8px"></div>
 <label>Nom<input id="n"></label>
 <label>Date de péremption<input id="e" type="month"></label>
-<div><b>Quand le prendre ?</b></div>
-<div class="chips">${Object.keys(SLOTS).map(s=>`<button class="chip" data-s="${s}" onclick="this.classList.toggle('on')">${SLOTS[s][0]}</button>`).join('')}</div>
+<label>Stock (nombre de comprimés)<input id="st" type="number" min="0" inputmode="numeric"></label>
+<div><b>Schéma de prise</b></div>
+<div id="ph">${phRow({days:60,every:1,qty:1,times:['08:00']})}</div>
+<button class="small" onclick="$('#ph').insertAdjacentHTML('beforeend',phRow({days:3,every:1,qty:1,times:['08:00']}))">+ Ajouter une phase</button>
 <button class="big go" onclick="saveMed()">Créer les rappels</button>`},
 cal(){const ds=doses();let h=back+'<h1>Calendrier</h1><div class="sub">Aujourd’hui</div>';
 if(!ds.length)h+='<div class="card">Aucun rappel. Ajoutez un médicament.</div>';
-ds.forEach(x=>{const st=S.log[x.k];h+=`<button class="row" onclick="go('remind',{key:'${x.k}'})"><span><b>${hm(x.t)}</b> · ${SLOTS[x.s][0]}<br>${esc(x.m.name)}</span><span class="st ${st||''}">${st==='pris'?'✓ Pris':st==='pas'?'✗ Pas pris':'À prendre'}</span></button>`});
+ds.forEach(x=>{const st=S.log[x.k];h+=`<button class="row" onclick="go('remind',{key:'${x.k}'})"><span><b>${hm(x.t)}</b> · ${x.q} cp<br>${esc(x.m.name)}</span><span class="st ${st||''}">${st==='pris'?'✓ Pris':st==='pas'?'✗ Pas pris':'À prendre'}</span></button>`});
+const ren=S.meds.filter(m=>{const l=left(m);return l!==null&&l<=7});
+if(ren.length)h+='<h1 style="font-size:26px;margin-top:12px">À renouveler</h1>'+ren.map(m=>`<div class="row"><span>${esc(m.name)}</span><span class="st pas">${left(m)} j restants</span></div>`).join('');
 const soon=S.meds.filter(m=>exp(m.expiry)[0]&&exp(m.expiry)[0]!=='OK');
 if(soon.length)h+='<h1 style="font-size:26px;margin-top:12px">Péremptions</h1>'+soon.map(m=>`<div class="row"><span>${esc(m.name)}</span><span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}<br>${fm(m.expiry)}</span></div>`).join('');
 return h},
 remind(){const x=doses().find(d=>d.k===tmp.key);if(!x)return V.home();
-return `<div class="sub">Rappel · ${hm(x.t)}</div><div class="hero">C’est l’heure de votre médicament</div><div class="card"><b style="font-size:28px">${esc(x.m.name)}</b><span class="sub">${SLOTS[x.s][0]}</span></div><div class="flex1"><button class="big go" onclick="answer('${x.k}',true)">✓ J’ai pris</button><button class="big no" onclick="answer('${x.k}',false)">✗ Pas pris</button></div>`},
+return `<div class="sub">Rappel · ${hm(x.t)}</div><div class="hero">C’est l’heure de votre médicament</div><div class="card"><b style="font-size:28px">${esc(x.m.name)}</b><span class="sub">${x.q} comprimé(s)</span></div><div class="flex1"><button class="big go" onclick="answer('${x.k}',true)">✓ J’ai pris</button><button class="big no" onclick="answer('${x.k}',false)">✗ Pas pris</button></div>`},
 alert(){const x=doses().find(d=>d.k===tmp.key);
 if(!S.proches.length)return back+'<h1>Pas pris</h1><div class="card">Ajoutez d’abord un proche à prévenir.</div><button class="big" onclick="go(\'proches\')">Mes proches</button>';
 const msg=encodeURIComponent('Bonjour, je n’ai pas pris mon médicament'+(x?' ('+x.m.name+' de '+hm(x.t)+')':'')+'.');
 return '<h1>Prévenir un proche ?</h1><div class="sub">Un message SMS s’ouvre, il ne reste qu’à l’envoyer.</div>'+S.proches.map(p=>`<a class="big" href="sms:${p.phone.replace(/\s/g,'')}?body=${msg}">SMS à ${esc(p.name)}</a>`).join('')+'<button class="big" style="background:#fff;color:#1F2A2E;border:2px solid #CFC8B8" onclick="go(\'cal\')">Non merci</button>'},
 proches(){return pv('proches','Mes proches','Ils sont prévenus par SMS si vous répondez « Pas pris ».')},
 famille(){return pv('famille','Famille','Coordonnées des membres de la famille.')},
-meds(){return back+'<h1>Mes médicaments</h1>'+(S.meds.length?S.meds.map((m,i)=>`<div class="card"><b>${esc(m.name)}</b><span>Péremption : ${fm(m.expiry)} · <span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}</span></span><span class="sub">${m.slots.map(s=>SLOTS[s][0]).join(', ')}</span><button class="small" onclick="delMed(${i})">Retirer</button></div>`).join(''):'<div class="card">Aucun médicament pour l’instant.</div>')},
+meds(){return back+'<h1>Mes médicaments</h1>'+(S.meds.length?S.meds.map((m,i)=>`<div class="card"><b>${esc(m.name)}</b><span>Péremption : ${fm(m.expiry)} · <span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}</span></span><span class="sub">${m.phases.map(p=>p.days+' j × '+p.times.length+'/jour'+(p.every>1?' (tous les '+p.every+' j)':'')).join(' puis ')}</span><span>Stock : ${m.stock==null?'non renseigné':m.stock+' cp'+(left(m)<999?' · env. '+left(m)+' j':'')}</span><button class="small" onclick="setStock(${i})">Mettre à jour le stock</button><button class="small" onclick="delMed(${i})">Retirer</button></div>`).join(''):'<div class="card">Aucun médicament pour l’instant.</div>')},
 call(){const all=S.proches.concat(S.famille);return back+'<h1>Appeler</h1>'+(all.length?all.map(p=>`<a class="big" href="tel:${p.phone.replace(/\s/g,'')}">${esc(p.name)}</a>`).join(''):'<div class="card">Ajoutez d’abord un proche ou un membre de la famille.</div>')}
 };
-let stream=null,scanning=false;
-async function scan(){
-const m=$('#scanmsg');
-if(!('BarcodeDetector' in window)){m.textContent='Scan non disponible sur cet appareil : saisissez le nom à la main.';return}
-try{
-stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-const v=$('#v');v.srcObject=stream;v.hidden=false;await v.play();
-const det=new BarcodeDetector();scanning=true;
-const loop=async()=>{if(!scanning)return;
-try{const r=await det.detect(v);if(r.length){const raw=r[0].rawValue.replace(/[()]/g,'');stop();
-const g=raw.match(/01\d{14}17(\d{2})(\d{2})/);
-if(g){$('#e').value='20'+g[1]+'-'+g[2];m.textContent='Code lu, péremption remplie. Saisissez le nom.'}
-else m.textContent='Code lu : '+raw.slice(0,30)+'. Saisissez le nom et la péremption.';return}}catch(e){}
-setTimeout(loop,300)};
-loop();
-}catch(e){m.textContent='Caméra refusée ou indisponible.'}
-}
-function stop(){scanning=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}const v=$('#v');if(v)v.hidden=true}
+function stop(){}
+const phRow=p=>`<div class="card ph"><label>Pendant (jours)<input class="d" type="number" min="1" value="${p.days}"></label><label>Tous les (jours)<input class="e" type="number" min="1" value="${p.every}"></label><label>Heures (ex. 08:00, 20:00)<input class="t" value="${p.times.join(', ')}"></label><label>Comprimés par prise<input class="q" type="number" min="0.5" step="0.5" value="${p.qty}"></label><button class="small" onclick="this.parentNode.remove()">Retirer la phase</button></div>`;
+const setPhases=a=>{$('#ph').innerHTML=a.map(phRow).join('')};
+const normT=t=>t.split(/[,; ]+/).filter(Boolean).map(x=>{const[h,m]=x.replace(/h/i,':').split(':');return String(+h).padStart(2,'0')+':'+String(+(m||0)).padStart(2,'0')});
+async function ocr(img,m){if(!window.Tesseract){m.textContent='Chargement du lecteur de texte…';await new Promise((ok,ko)=>{const c=document.createElement('script');c.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';c.onload=ok;c.onerror=ko;document.head.appendChild(c)})}
+m.textContent='Lecture en cours…';const w=await Tesseract.createWorker('fra');const r=await w.recognize(img);await w.terminate();return r.data.text}
+function parseRx(l){const o={name:l.replace(/\d.*$/,'').trim()||l,phases:null};
+const p=l.match(/\b(\d)\s*[-–]\s*(\d)\s*[-–]\s*(\d)(?:\s*[-–]\s*(\d))?\b/),d=l.match(/(\d+)\s*(jours?|semaines?|mois)/i);
+if(p){let days=60;if(d)days=+d[1]*(/sem/i.test(d[2])?7:/mois/i.test(d[2])?30:1);const T=['08:00','12:00','19:00','22:00'],t=[],q=[];[p[1],p[2],p[3],p[4]].forEach((v,i)=>{if(v&&+v>0){t.push(T[i]);q.push(+v)}});o.phases=[{days,every:1,qty:q[0]||1,times:t}]}return o}
+async function onPhoto(inp,mode){const f=inp.files[0];if(!f)return;const m=$('#scanmsg');
+try{const b=await createImageBitmap(f),k=Math.min(1,1800/Math.max(b.width,b.height)),c=document.createElement('canvas');c.width=b.width*k;c.height=b.height*k;c.getContext('2d').drawImage(b,0,0,c.width,c.height);
+let ok=false;if(mode==='box'&&'BarcodeDetector' in window){try{const r=await new BarcodeDetector().detect(c);const g=r.length&&r[0].rawValue.replace(/[()]/g,'').match(/01\d{14}17(\d{2})(\d{2})/);if(g){$('#e').value='20'+g[1]+'-'+g[2];ok=true}}catch(e){}}
+const txt=await ocr(c,m);
+if(!ok){const g=txt.match(/(?:EXP|Verw\.?bis|Ablauf|Exp)[^\d]{0,10}(\d{1,2})[\/.\- ](\d{2,4})/i);if(g){const y=g[2].length===2?'20'+g[2]:g[2];$('#e').value=y+'-'+g[1].padStart(2,'0')}}
+tmp.cands=[...new Set(txt.split('\n').map(l=>l.replace(/[^\p{L}\d .,%\/–-]/gu,'').trim()).filter(l=>(l.match(/\p{L}/gu)||[]).length>=4))].slice(0,10).map(l=>mode==='rx'?parseRx(l):{name:l.replace(/\d.*$/,'').trim()||l,line:l});
+tmp.cands.forEach(x=>x.line=x.line||x.name);
+$('#cand').innerHTML=tmp.cands.map((x,i)=>`<button class="small" style="align-self:stretch;text-align:left" onclick="useCand(${i})">${esc(x.line||x.name)}</button>`).join('');
+m.textContent=tmp.cands.length?'Touchez la ligne qui correspond au médicament, puis vérifiez tout.':'Rien de lisible : réessayez avec plus de lumière ou saisissez à la main.'
+}catch(e){m.textContent='Lecture impossible ici : saisissez à la main.'}
+inp.value=''}
+function useCand(i){const c=tmp.cands[i];if(c.name)$('#n').value=c.name.trim();if(c.phases)setPhases(c.phases)}
 function saveMed(){
 const name=$('#n').value.trim(),e=$('#e').value,slots=[...document.querySelectorAll('.chip.on')].map(c=>c.dataset.s);
 if(!name||!slots.length){alert('Indiquez le nom et au moins un moment de la journée.');return}
@@ -134,13 +146,15 @@ go('cal')}
 function delMed(i){if(confirm('Retirer ce médicament ?')){S.meds.splice(i,1);save();render()}}
 function addP(kind){const name=$('#pn').value.trim(),phone=$('#pp').value.trim();if(!name||!phone){alert('Indiquez un prénom et un numéro.');return}S[kind].push({name,phone});save();render()}
 function del(kind,i){if(confirm('Retirer cette personne ?')){S[kind].splice(i,1);save();render()}}
-function answer(k,ok){S.log[k]=ok?'pris':'pas';save();go(ok?'cal':'alert',{key:k})}
+function answer(k,ok){const x=doses().find(d=>d.k===k),was=S.log[k];if(x&&x.m.stock!=null){if(ok&&was!=='pris')x.m.stock=Math.max(0,x.m.stock-x.q);if(!ok&&was==='pris')x.m.stock+=x.q}S.log[k]=ok?'pris':'pas';save();go(ok?'cal':'alert',{key:k})}
 function notify(x){if('Notification' in window&&Notification.permission==='granted'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification('C’est l’heure',{body:x.m.name,tag:x.k,requireInteraction:true}))}
 setInterval(()=>{if(view!=='home'&&view!=='cal')return;
 const n=new Date(),t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
 const x=doses().find(d=>d.t<=t&&!S.log[d.k]&&!prompted.has(d.k));
 if(x){prompted.add(x.k);notify(x);go('remind',{key:x.k})}},15000);
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+S.meds.forEach(m=>{if(!m.phases){m.phases=[{days:3650,every:1,qty:1,times:m.slots.map(x=>SLOTS[x][1])}];m.start=today();if(m.stock===undefined)m.stock=null}});
+save();
 render();
 </script>
 </body>
