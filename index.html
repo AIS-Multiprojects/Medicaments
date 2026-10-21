@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#F6F3EC">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>Mes médicaments</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#F6F3EC;color:#1F2A2E;font-family:system-ui,-apple-system,Roboto,sans-serif;font-size:20px}
+button,input,a{font:inherit}
+.scr{min-height:100dvh;padding:max(28px,env(safe-area-inset-top)) 20px max(24px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:16px}
+h1{margin:0;font-size:32px;line-height:1.1}
+.sub{color:#4A575B}
+.grid{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,1fr);gap:14px;min-height:480px}
+.tile{border:2px solid #CFC8B8;border-radius:22px;background:#fff;color:#1F2A2E;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;padding:16px;text-align:left;font-size:24px;font-weight:700}
+.tile small{display:block;font-weight:400;font-size:16px;color:#4A575B}
+.tile.p{background:#17506B;border-color:#17506B;color:#fff}
+.tile.p small{color:#fff}
+.card{background:#fff;border:2px solid #CFC8B8;border-radius:22px;padding:18px;display:flex;flex-direction:column;gap:10px}
+.big{display:block;text-align:center;text-decoration:none;border:0;border-radius:22px;background:#17506B;color:#fff;font-size:26px;font-weight:700;padding:22px}
+.go{background:#14573A}
+.no{background:#B42318}
+.back{align-self:flex-start;border:0;background:none;color:#17506B;font-size:20px;font-weight:700;padding:8px 0}
+.small{border:2px solid #CFC8B8;background:#fff;border-radius:14px;padding:10px 16px;font-size:18px;align-self:flex-start}
+label{display:flex;flex-direction:column;gap:6px;font-weight:700}
+input{border:2px solid #CFC8B8;border-radius:16px;padding:14px;font-size:22px;background:#fff;width:100%}
+.chips{display:flex;gap:10px}
+.chip{flex:1;border:2px solid #CFC8B8;border-radius:18px;background:#fff;padding:18px 4px;font-size:22px;font-weight:700}
+.chip.on{background:#17506B;border-color:#17506B;color:#fff}
+.chip.on::before{content:'✓ '}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;text-align:left;border:2px solid #CFC8B8;border-radius:20px;background:#fff;color:#1F2A2E;padding:16px;font-size:20px}
+.st{font-weight:700;text-align:right}
+.st.pris{color:#14573A}
+.st.pas{color:#B42318}
+video{width:100%;border-radius:18px;background:#000}
+.hero{font-size:36px;font-weight:700;line-height:1.1}
+.flex1{flex:1;display:flex;flex-direction:column;gap:16px}
+.flex1 .big{flex:1;display:flex;align-items:center;justify-content:center}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+const $=s=>document.querySelector(s);
+const K='meds-proto-v1';
+let S=JSON.parse(localStorage.getItem(K)||'null')||{meds:[],proches:[],famille:[],log:{}};
+const save=()=>localStorage.setItem(K,JSON.stringify(S));
+let view='home',tmp={};
+const prompted=new Set();
+const SLOTS={matin:['Matin','08:00'],midi:['Midi','12:00'],soir:['Soir','19:00']};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const IC={
+add:'<path d="M12 5v14M5 12h14"/>',
+cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+pro:'<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 14.5c2.5 0 4 1.8 4 4.5"/>',
+fam:'<path d="M4 11l8-7 8 7v9H4z"/><path d="M10 20v-6h4v6"/>',
+med:'<path d="M9 3h6v3H9z"/><path d="M7 6h10v14a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/><path d="M7 12h10"/>',
+tel:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A15 15 0 0 1 3 6a2 2 0 0 1 2-2z"/>'
+};
+const svg=(k,c)=>`<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+const TILES=[
+{v:'add',t:'Ajouter',s:'Scanner une boîte',i:'add'},
+{v:'cal',t:'Calendrier',s:'Prises et dates',i:'cal'},
+{v:'proches',t:'Mes proches',s:'Ils m’aident',i:'pro'},
+{v:'famille',t:'Famille',s:'Coordonnées',i:'fam'},
+{v:'meds',t:'Mes médicaments',s:'Ma pharmacie',i:'med'},
+{v:'call',t:'Appeler',s:'Proche ou médecin',i:'tel'}];
+const back='<button class="back" onclick="go(\'home\')">← Accueil</button>';
+function doses(){const d=today(),o=[];S.meds.forEach(m=>m.slots.forEach(s=>o.push({k:d+'|'+m.id+'|'+s,m,s,t:SLOTS[s][1]})));return o.sort((a,b)=>a.t.localeCompare(b.t))}
+function exp(e){if(!e)return['',''];const[y,m]=e.split('-').map(Number);const d=Math.ceil((new Date(y,m,0,23,59)-new Date())/864e5);return d<0?['Expiré','pas']:d<=60?['Expire bientôt','']:['OK','pris']}
+const fm=e=>e?e.slice(5)+'/'+e.slice(0,4):'—';
+const hm=t=>t.replace(':',' h ');
+function go(v,t){stop();view=v;tmp=t||{};render()}
+function render(){const f=V[view]||V.home;$('#app').innerHTML='<div class="scr">'+f()+'</div>';window.scrollTo(0,0)}
+function pv(kind,title,sub){
+return back+`<h1>${title}</h1><div class="sub">${sub}</div>`+S[kind].map((p,i)=>`<div class="card"><b>${esc(p.name)}</b><span>${esc(p.phone)}</span><button class="small" onclick="del('${kind}',${i})">Retirer</button></div>`).join('')+
+`<div class="card"><label>Prénom<input id="pn"></label><label>Téléphone<input id="pp" type="tel" inputmode="tel"></label><button class="big" onclick="addP('${kind}')">Ajouter</button></div>`}
+const V={
+home(){return '<div><div class="sub">Bonjour</div><h1>Que voulez-vous faire ?</h1></div><div class="grid">'+TILES.map((x,n)=>`<button class="tile${n?'':' p'}" onclick="go('${x.v}')">${svg(x.i,n?'#17506B':'#fff')}<span>${x.t}<small>${x.s}</small></span></button>`).join('')+'</div>'},
+add(){return back+`<h1>Ajouter un médicament</h1>
+<button class="big" onclick="scan()">Scanner la boîte</button>
+<video id="v" playsinline muted hidden></video>
+<div class="sub" id="scanmsg">Le scan lit le code de la boîte. Saisissez le nom à la main.</div>
+<label>Nom<input id="n"></label>
+<label>Date de péremption<input id="e" type="month"></label>
+<div><b>Quand le prendre ?</b></div>
+<div class="chips">${Object.keys(SLOTS).map(s=>`<button class="chip" data-s="${s}" onclick="this.classList.toggle('on')">${SLOTS[s][0]}</button>`).join('')}</div>
+<button class="big go" onclick="saveMed()">Créer les rappels</button>`},
+cal(){const ds=doses();let h=back+'<h1>Calendrier</h1><div class="sub">Aujourd’hui</div>';
+if(!ds.length)h+='<div class="card">Aucun rappel. Ajoutez un médicament.</div>';
+ds.forEach(x=>{const st=S.log[x.k];h+=`<button class="row" onclick="go('remind',{key:'${x.k}'})"><span><b>${hm(x.t)}</b> · ${SLOTS[x.s][0]}<br>${esc(x.m.name)}</span><span class="st ${st||''}">${st==='pris'?'✓ Pris':st==='pas'?'✗ Pas pris':'À prendre'}</span></button>`});
+const soon=S.meds.filter(m=>exp(m.expiry)[0]&&exp(m.expiry)[0]!=='OK');
+if(soon.length)h+='<h1 style="font-size:26px;margin-top:12px">Péremptions</h1>'+soon.map(m=>`<div class="row"><span>${esc(m.name)}</span><span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}<br>${fm(m.expiry)}</span></div>`).join('');
+return h},
+remind(){const x=doses().find(d=>d.k===tmp.key);if(!x)return V.home();
+return `<div class="sub">Rappel · ${hm(x.t)}</div><div class="hero">C’est l’heure de votre médicament</div><div class="card"><b style="font-size:28px">${esc(x.m.name)}</b><span class="sub">${SLOTS[x.s][0]}</span></div><div class="flex1"><button class="big go" onclick="answer('${x.k}',true)">✓ J’ai pris</button><button class="big no" onclick="answer('${x.k}',false)">✗ Pas pris</button></div>`},
+alert(){const x=doses().find(d=>d.k===tmp.key);
+if(!S.proches.length)return back+'<h1>Pas pris</h1><div class="card">Ajoutez d’abord un proche à prévenir.</div><button class="big" onclick="go(\'proches\')">Mes proches</button>';
+const msg=encodeURIComponent('Bonjour, je n’ai pas pris mon médicament'+(x?' ('+x.m.name+' de '+hm(x.t)+')':'')+'.');
+return '<h1>Prévenir un proche ?</h1><div class="sub">Un message SMS s’ouvre, il ne reste qu’à l’envoyer.</div>'+S.proches.map(p=>`<a class="big" href="sms:${p.phone.replace(/\s/g,'')}?body=${msg}">SMS à ${esc(p.name)}</a>`).join('')+'<button class="big" style="background:#fff;color:#1F2A2E;border:2px solid #CFC8B8" onclick="go(\'cal\')">Non merci</button>'},
+proches(){return pv('proches','Mes proches','Ils sont prévenus par SMS si vous répondez « Pas pris ».')},
+famille(){return pv('famille','Famille','Coordonnées des membres de la famille.')},
+meds(){return back+'<h1>Mes médicaments</h1>'+(S.meds.length?S.meds.map((m,i)=>`<div class="card"><b>${esc(m.name)}</b><span>Péremption : ${fm(m.expiry)} · <span class="st ${exp(m.expiry)[1]}">${exp(m.expiry)[0]}</span></span><span class="sub">${m.slots.map(s=>SLOTS[s][0]).join(', ')}</span><button class="small" onclick="delMed(${i})">Retirer</button></div>`).join(''):'<div class="card">Aucun médicament pour l’instant.</div>')},
+call(){const all=S.proches.concat(S.famille);return back+'<h1>Appeler</h1>'+(all.length?all.map(p=>`<a class="big" href="tel:${p.phone.replace(/\s/g,'')}">${esc(p.name)}</a>`).join(''):'<div class="card">Ajoutez d’abord un proche ou un membre de la famille.</div>')}
+};
+let stream=null,scanning=false;
+async function scan(){
+const m=$('#scanmsg');
+if(!('BarcodeDetector' in window)){m.textContent='Scan non disponible sur cet appareil : saisissez le nom à la main.';return}
+try{
+stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+const v=$('#v');v.srcObject=stream;v.hidden=false;await v.play();
+const det=new BarcodeDetector();scanning=true;
+const loop=async()=>{if(!scanning)return;
+try{const r=await det.detect(v);if(r.length){const raw=r[0].rawValue.replace(/[()]/g,'');stop();
+const g=raw.match(/01\d{14}17(\d{2})(\d{2})/);
+if(g){$('#e').value='20'+g[1]+'-'+g[2];m.textContent='Code lu, péremption remplie. Saisissez le nom.'}
+else m.textContent='Code lu : '+raw.slice(0,30)+'. Saisissez le nom et la péremption.';return}}catch(e){}
+setTimeout(loop,300)};
+loop();
+}catch(e){m.textContent='Caméra refusée ou indisponible.'}
+}
+function stop(){scanning=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}const v=$('#v');if(v)v.hidden=true}
+function saveMed(){
+const name=$('#n').value.trim(),e=$('#e').value,slots=[...document.querySelectorAll('.chip.on')].map(c=>c.dataset.s);
+if(!name||!slots.length){alert('Indiquez le nom et au moins un moment de la journée.');return}
+S.meds.push({id:Date.now(),name,expiry:e,slots});save();
+if('Notification' in window&&Notification.permission==='default')Notification.requestPermission();
+go('cal')}
+function delMed(i){if(confirm('Retirer ce médicament ?')){S.meds.splice(i,1);save();render()}}
+function addP(kind){const name=$('#pn').value.trim(),phone=$('#pp').value.trim();if(!name||!phone){alert('Indiquez un prénom et un numéro.');return}S[kind].push({name,phone});save();render()}
+function del(kind,i){if(confirm('Retirer cette personne ?')){S[kind].splice(i,1);save();render()}}
+function answer(k,ok){S.log[k]=ok?'pris':'pas';save();go(ok?'cal':'alert',{key:k})}
+function notify(x){if('Notification' in window&&Notification.permission==='granted'&&navigator.serviceWorker)navigator.serviceWorker.ready.then(r=>r.showNotification('C’est l’heure',{body:x.m.name,tag:x.k,requireInteraction:true}))}
+setInterval(()=>{if(view!=='home'&&view!=='cal')return;
+const n=new Date(),t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+const x=doses().find(d=>d.t<=t&&!S.log[d.k]&&!prompted.has(d.k));
+if(x){prompted.add(x.k);notify(x);go('remind',{key:x.k})}},15000);
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js');
+render();
+</script>
+</body>
+</html>
